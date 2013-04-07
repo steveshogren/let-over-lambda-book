@@ -36,3 +36,24 @@
      (fact (- n r))
      (fact r)))
 
+(defun register-allocated-fixnum ()
+  (declare (optimize (speed 3) (safety 0)))
+  (let ((acc 0))
+    (loop for i from 1 to 100 do
+          (incf (the fixnum acc)
+                (the fixnum i)))
+    acc))
+
+(let ((direction 'up))
+  (defun toggle-counter-direction ()
+    (setq direction
+          (if (eq direction 'up)
+              'down
+            'up)))
+  (defun counter-class ()
+    (let ((counter 0))
+      (lambda ()
+        (if (eq direction 'up)
+            (incf counter)
+          (decf counter))))))
+
