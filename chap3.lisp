@@ -51,3 +51,37 @@
                         1
                       (* n (fact (- n 1))))))
 
+(defmacro x-injector ()
+  'x)
+
+(defmacro nif (expr pos zero neg)
+  (let ((g (gensym)))
+    `(let ((,g ,expr))
+       (cond
+        ((plusp ,g) ,pos)
+        ((zerop ,g) ,zero)
+        (t ,neg)))))
+
+(nif -5 "positive" "zero" "negative")
+
+(defun g!-symbol-p (s)
+  (and (symbolp s)
+       (> (length (symbol-name s)) 2)
+       (string= (symbol-name s)
+                "G!"
+                :start1 0
+                :end1 2)))
+
+(defmacro defmacro/g! (name args &rest body)
+  (let ((syms (remove-duplicates
+               (remove-if-not #'g!-symbol-p
+                              (flatten body)))))
+    `(defmacro ,name ,args
+       (let ,(mapcar
+              (lambda (s)
+                `(,s (gensym ,(subseq
+                               (symbol-name s)
+                               2))))
+              syms)
+         ,body))))
+
