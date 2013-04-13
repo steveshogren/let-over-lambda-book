@@ -32,7 +32,7 @@
          ((d) 86400)
          ((ms) 1/1000)
          ((us) 1/1000000))))
-(unit-of-time 4 d)
+(macroexpand '(unit-of-time 4 d))
 
 (load "chap1.lisp")
 (defmacro nlet (n letargs &rest body)
@@ -62,7 +62,7 @@
         ((zerop ,g) ,zero)
         (t ,neg)))))
 
-(nif -5 "positive" "zero" "negative")
+(macroexpand '(nif -5 "positive" "zero" "negative"))
 
 (defun g!-symbol-p (s)
   (and (symbolp s)
@@ -71,6 +71,8 @@
                 "G!"
                 :start1 0
                 :end1 2)))
+(* (remove-duplicates (flatten '(test (this (test this)))))
+   *)
 
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
