@@ -101,9 +101,13 @@
   (macroexpand '(nif -5 "positive" "zero" "negative")) *)
 
 (defun o!-symbol-to-g!-symbol (s)
-  (symb "G!"
-        (subseq (symbol-name s) 2)))
-(o!-symbol-to-g!-symbol 'o!hosurst)
+  (cond
+   ((o!-symbol-p s)
+    (symb "G!" (subseq (symbol-name s) 2)))
+   ;; do nothing
+   (t s)))
+
+(o!-symbol-to-g!-symbol 'osurst)
 
 (defun mkstr (&rest args)
        (with-output-to-string (s)
