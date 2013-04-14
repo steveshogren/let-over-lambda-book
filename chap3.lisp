@@ -54,7 +54,7 @@
 (defmacro x-injector ()
   'x)
 
-(defmacro nif (expr pos zero neg)
+(defmacro nif! (expr pos zero neg)
   (let ((g (gensym)))
     `(let ((,g ,expr))
        (cond
@@ -62,15 +62,18 @@
         ((zerop ,g) ,zero)
         (t ,neg)))))
 
-(macroexpand '(nif -5 "positive" "zero" "negative"))
-
-(defun g!-symbol-p (s)
-  (and (symbolp s)
-       (> (length (symbol-name s)) 2)
-       (string= (symbol-name s)
-                "G!"
+(defun is-symbol-p (symbl needle)
+  (and (symbolp symbl)
+       (> (length (symbol-name symbl)) 2)
+       (string= (symbol-name symbl)
+                needle
                 :start1 0
                 :end1 2)))
+
+
+(defun g!-symbol-p (s) (is-symbol-p s "G!"))
+(defun o!-symbol-p (s) (is-symbol-p s "O!"))
+
 (* (remove-duplicates (flatten '(test (this (test this)))))
    *)
 
@@ -85,5 +88,29 @@
                                (symbol-name s)
                                2))))
               syms)
-         ,body))))
+         ,@body))))
+
+(defmacro/g! nif (expr pos zero neg)
+  `(let ((,g!result ,expr))
+     (cond ((plusp ,g!result) ,pos)
+           ((zerop ,g!result) ,zero)
+           (t ,neg))))
+
+(*
+ (nif -5 "positive" "zero" "negative")
+  (macroexpand '(nif -5 "positive" "zero" "negative")) *)
+
+(defun o!-symbol-to-g!-symbol (s)
+  (symb "G!"
+        (subseq (symbol-name s) 2)))
+(o!-symbol-to-g!-symbol 'o!hosurst)
+
+(defun mkstr (&rest args)
+       (with-output-to-string (s)
+          (dolist (a args) (princ a s))))
+
+(defun symb (&rest args)
+  (values (intern (apply #'mkstr args))))
+
+
 
