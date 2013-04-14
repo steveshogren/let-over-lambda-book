@@ -96,6 +96,13 @@
            ((zerop ,g!result) ,zero)
            (t ,neg))))
 
+(defun mkstr (&rest args)
+       (with-output-to-string (s)
+          (dolist (a args) (princ a s))))
+
+(defun symb (&rest args)
+  (values (intern (apply #'mkstr args))))
+
 (*
  (nif -5 "positive" "zero" "negative")
   (macroexpand '(nif -5 "positive" "zero" "negative")) *)
@@ -109,12 +116,12 @@
 
 (o!-symbol-to-g!-symbol 'osurst)
 
-(defun mkstr (&rest args)
-       (with-output-to-string (s)
-          (dolist (a args) (princ a s))))
-
-(defun symb (&rest args)
-  (values (intern (apply #'mkstr args))))
+(defmacro defmacro! (name args &rest body)
+  (let* ((os (remove-if-not #'o!-symbol-p args))
+         (gs (mapcar #'o!-symbol-to-g!-symbol os)))
+    `(defmacro/g! ,name ,args
+       `(let ,(mapcar #'list (list ,@gs) (list ,@os))
+          ,(progn ,@body)))))
 
 
 
