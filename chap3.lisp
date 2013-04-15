@@ -114,8 +114,6 @@
    ;; do nothing
    (t s)))
 
-(o!-symbol-to-g!-symbol 'osurst)
-
 (defmacro defmacro! (name args &rest body)
   (let* ((os (remove-if-not #'o!-symbol-p args))
          (gs (mapcar #'o!-symbol-to-g!-symbol os)))
@@ -124,4 +122,10 @@
           ,(progn ,@body)))))
 
 
+(defmacro! square (o!x)
+  `(* ,g!x ,g!x))
 
+(macroexpand '(square (let ((x 1)) (incf x))))
+
+(* (square (let ((x 1))
+             (incf x))) *)
