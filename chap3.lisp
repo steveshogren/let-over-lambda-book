@@ -125,7 +125,23 @@
 (defmacro! square (o!x)
   `(* ,g!x ,g!x))
 
+
+(defmacro! square (o!x)
+  `(progn
+     (format t "[~a game ~a]~%"
+             ',o!x    ,g!x)
+     (* ,g!x ,g!x)))
+
 (macroexpand '(square (let ((x 1)) (incf x))))
 
-(* (square (let ((x 1))
-             (incf x))) *)
+(defvar x 4)
+
+(* (square (incf x)) *)
+
+(defmacro! nifest (o!expr pos zero neg)
+  `(cond ((plusp ,g!expr) ,pos)
+         ((zerop ,g!expr) ,zero)
+         (t ,neg)))
+
+(nifest (let ((x -1)) (incf x)) "p" "z" "n")
+
