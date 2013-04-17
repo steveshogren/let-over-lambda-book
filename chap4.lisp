@@ -23,6 +23,8 @@
 to-splice
 (defun dangerious-use-of-bq ()
   `(a ,.'(b c d) e))
-(dangerious-use-of-bq)
+;;(dangerious-use-of-bq)
+
+
 
 
