@@ -25,6 +25,19 @@ to-splice
   `(a ,.'(b c d) e))
 ;;(dangerious-use-of-bq)
 
+(defun safer-use-of-bq ()
+  `(a
+    ,. (mapcar #'identity '(b c d))
+    e))
 
+(let (*print-pretty*)
+  (print
+   `'(football-game
+      (game-started-at
+       ,(get-internal-real-time))
+      (coin-flip
+       ,(if (zerop (random 2))
+            'heads
+          'tails)))))
 
 
