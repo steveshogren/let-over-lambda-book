@@ -39,5 +39,13 @@ to-splice
        ,(if (zerop (random 2))
             'heads
           'tails)))))
+(let ((s 'c))
+  ('a s))
+
+(let ((let '`(let ((let ',let))
+               ,let)))
+  `(let ((let ',let)) ,let))
+(equal * +)
+
 
 
