@@ -74,8 +74,8 @@
 (defun g!-symbol-p (s) (is-symbol-p s "G!"))
 (defun o!-symbol-p (s) (is-symbol-p s "O!"))
 
-(* (remove-duplicates (flatten '(test (this (test this)))))
-   *)
+ ;;(remove-duplicates (flatten '(test (this (test this)))))
+   
 
 (defmacro defmacro/g! (name args &rest body)
   (let ((syms (remove-duplicates
@@ -103,9 +103,9 @@
 (defun symb (&rest args)
   (values (intern (apply #'mkstr args))))
 
-(*
- (nif -5 "positive" "zero" "negative")
-  (macroexpand '(nif -5 "positive" "zero" "negative")) *)
+
+;; (nif -5 "positive" "zero" "negative")
+;;  (macroexpand '(nif -5 "positive" "zero" "negative")) *)
 
 (defun o!-symbol-to-g!-symbol (s)
   (cond
@@ -136,7 +136,7 @@
 
 (defvar x 4)
 
-(* (square (incf x)) *)
+;;(* (square (incf x)) *)
 
 (defmacro! nifest (o!expr pos zero neg)
   `(cond ((plusp ,g!expr) ,pos)
