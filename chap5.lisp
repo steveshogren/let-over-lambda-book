@@ -125,3 +125,51 @@
            (tree-leaves% (cdr tree)
                          result))
         result)))
+
+(tree-leaves% '(2 (nil t (a . b)))
+              'leaf)
+
+(defun predicate-splitter (orderp splitp)
+  (lambda (a b)
+    (let ((s (funcall splitp a)))
+      (if (eq s (funcall splitp b))
+          (funcall orderp a b)
+        s))))
+(sort '(5 1 2 4 3 8 9 6 7)
+      (predicate-splitter #'< #'evenp))
+
+(defun tree-leaves%% (tree test result)
+  (if tree
+      (if (listp tree)
+          (cons
+           (tree-leaves%% (car tree) test result)
+           (tree-leaves%% (cdr tree) test result))
+        (if (funcall test tree)
+            (funcall result tree)
+          tree))))
+
+(tree-leaves%%
+ '(1 2 (3 4 (5 6)))
+ (lambda (x)
+   (declare (ignorable x))
+   (and (numberp x) (evenp x)))
+ (lambda (x)
+   (declare (ignorable x))
+   'even-number))
+
+(defmacro tree-leaves (tree test result)
+  `(tree-leaves%%
+    ,tree
+    (lambda (x)
+      (declare (ignorable x))
+      ,test)
+    (lambda (x)
+      (declare (ignorable x))
+      ,result)))
+
+(tree-leaves
+ '(1 2 (3 4 (5 6)))
+ (and (numberp x) (evenp x))
+ 'even-number)
+
+
