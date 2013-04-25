@@ -190,4 +190,9 @@
            (tagbody
             ,g!n (return-from
                      ,g!b (progn ,@body))))))))
+(defun nlet-tail-fact (n)
+  (nlet-tail fact ((n n) (acc 1))
+             (if (zerop n)
+                 acc
+               (fact (- n 1) (* acc n)))))
 
