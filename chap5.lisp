@@ -196,3 +196,58 @@
                  acc
                (fact (- n 1) (* acc n)))))
 
+(nlet-tail-fact 500)
+
+(find 'a
+      '(((a b) (c d)) ((c d) (b a)))
+      :key #'cadadr)
+(defmacro cxr% (x tree)
+  (if (null x)
+      tree
+    `(,(cond
+        ((eq 'a (cadr x)) 'car)
+        ((eq 'd (cadr x)) 'cdr)
+        (t (error "non a/d symbol")))
+      ,(if (= 1 (car x))
+           `(cxr% ,(cddr x) ,tree)
+         `(cxr% ,(cons (- (car x) 1) (cdr x))
+                ,tree)))))
+(defun eleventh (x)
+  (cxr% (1 a 10 d) x))
+
+(macroexpand
+  '(cxr% (1 a 10 d) x))
+
+(eleventh '(1 2 3 4 5 6 7 8 9 10 11 12 13))
+
+(defvar cxr-inline-thresh 10)
+(defmacro! cxr (x tree)
+  (if (null x)
+      tree
+    (let ((op (cond
+               ((eq 'a (cadr x)) 'car)
+               ((eq 'd (cadr x)) 'cdr)
+               (t (error "non a/d sumbol")))))
+      (if (and (intergerp (car x))
+               (<= 1 (car x) cxr-inline-thresh))
+          (if (= 1 (car x))
+              `(,op (cxr ,(cddr x) ,tree))
+            `(,op (cxr ,(cons (- (car x) 1) (cdr x))
+                       ,tree)))
+        `(nlet-tail
+          ,g!name ((,g!count ,(c ar x))
+                   (,g!val (cxr ,(cddr x) ,tree)))
+          (if (>= 0 ,g!count)
+              ,g!val
+            ;; will be a tail:
+            (,g!name (- ,g!count 1)
+                     (,op ,g!val))))))))
+(defun nthcdr% (n list)
+  (cxr (n d) list))
+
+(defun nth% (n list)
+  (cxr (1 a n d) list))
+
+(macroexpand
+ '(cxr (n d) list))
+
