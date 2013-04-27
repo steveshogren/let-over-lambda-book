@@ -228,14 +228,14 @@
                ((eq 'a (cadr x)) 'car)
                ((eq 'd (cadr x)) 'cdr)
                (t (error "non a/d sumbol")))))
-      (if (and (intergerp (car x))
+      (if (and (integerp (car x))
                (<= 1 (car x) cxr-inline-thresh))
           (if (= 1 (car x))
               `(,op (cxr ,(cddr x) ,tree))
             `(,op (cxr ,(cons (- (car x) 1) (cdr x))
                        ,tree)))
         `(nlet-tail
-          ,g!name ((,g!count ,(c ar x))
+          ,g!name ((,g!count ,(car x))
                    (,g!val (cxr ,(cddr x) ,tree)))
           (if (>= 0 ,g!count)
               ,g!val
@@ -250,4 +250,22 @@
 
 (macroexpand
  '(cxr (n d) list))
+
+(defmacro def-english-list-accessors (start end)
+  (if (not (<= 1 start end))
+      (error "bad start end range"))
+  `(progn
+     ,@(loop for i from start to end collect
+             `(defun
+                ,(symb
+                  (map 'string
+                       (lambda (c)
+                         (if (alpha-char-p c)
+                             (char-upcase c)
+                           #\-))
+                       (format nil "~:r" i)))
+                (arg)
+                (cxr (1 a ,(- i 1) d) arg)))))
+(macroexpand
+ '(def-english-list-accessors 11 20))
 
