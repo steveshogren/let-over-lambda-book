@@ -269,3 +269,9 @@
 (macroexpand
  '(def-english-list-accessors 11 20))
 
+(defun cxr-calculator (n)
+  (loop for i from 1 to n
+        sum (expt 2 i)))
+
+(cxr-calculator 4)
+
