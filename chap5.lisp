@@ -275,3 +275,54 @@
 
 (cxr-calculator 4)
 
+(loop for i from 1 to 16
+      collect (cxr-calculator i))
+
+(defun cxr-symbol-p (s)
+  (if (symbolp s)
+      (let ((chars (coerse
+                    (symbol-name s)
+                    'list)))
+        (and
+         (< 6 (length chars))
+         (char= #\C (car chars))
+         (char= #\R (car (last chars)))
+         (null (remove-if
+                (lambda (c)
+                  (or (char= c #\A)
+                      (char= c #\D)))
+                (cdr (butlast chars))))))))
+
+
+(defun cxr-symbol-to-cxr-list (s)
+  (labels ((collect (l)
+                    (if l
+                        (list*
+                         1
+                         (if (char= (car l) #\A)
+                             'A
+                           'D)
+                         (collect (cdr l))))))
+    (collect
+     (cdr   ; chop off C
+      (butlast ;chop off R
+       (coerce
+        (symbol-name s)
+        'list))))))
+
+(cxr-symbol-to-cxr-list 'caddadr)
+
+(defmacro with-all-cxrs (&rest forms)
+  `(labels
+       (,(@mapcar
+        (lambda (s)
+          `(,s (l)
+               (cxr ,(cxr-symbol-to-cxr-list s)
+                    l)))
+        (remove-duplicates
+         (remove-if-not
+          #'cxr-symbol-p
+          (flatten forms)))))
+     ,@forms))
+(with-all-cxrs #'cadadadadadadr)
+
