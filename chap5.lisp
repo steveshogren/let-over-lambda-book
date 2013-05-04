@@ -280,7 +280,7 @@
 
 (defun cxr-symbol-p (s)
   (if (symbolp s)
-      (let ((chars (coerse
+      (let ((chars (coerce
                     (symbol-name s)
                     'list)))
         (and
@@ -314,15 +314,16 @@
 
 (defmacro with-all-cxrs (&rest forms)
   `(labels
-       (,(@mapcar
-        (lambda (s)
-          `(,s (l)
-               (cxr ,(cxr-symbol-to-cxr-list s)
-                    l)))
-        (remove-duplicates
-         (remove-if-not
-          #'cxr-symbol-p
-          (flatten forms)))))
+       (,@(mapcar
+           (lambda (s)
+             `(,s (l)
+                  (cxr ,(cxr-symbol-to-cxr-list s)
+                       l)))
+           (remove-duplicates
+            (remove-if-not
+             #'cxr-symbol-p
+             (flatten forms)))))
      ,@forms))
+
 (with-all-cxrs #'cadadadadadadr)
 
