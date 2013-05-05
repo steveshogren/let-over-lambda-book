@@ -327,3 +327,52 @@
 
 (with-all-cxrs #'cadadadadadadr)
 
+(let ((count 0))
+  (lambda (msg)
+    (case msg
+      ((:inc)
+       (incf count))
+      ((:dec)
+       (decf count)))))
+
+(defmacro! dlambda (&rest ds)
+  `(lambda (&rest ,g!args)
+     (case (car ,g!args)
+       ,@(mapcar
+          (lambda (d)
+            `(,(if (eq t (car d))
+                   t
+                 (list (car d)))
+              (apply (lambda ,@(cdr d))
+                     ,(if (eq t (car d))
+                          g!args
+                        `(cdr ,g!args)))))
+          ds))))
+
+(setf (symbol-function 'count-test)
+      (let ((count 0))
+        (dlambda
+         (:reset () (setf count 0))
+         (:inc (n) (incf count n))
+         (:dec (n) (decf count n))
+         (:bound (lo hi)
+                 (setf count
+                       (min hi
+                            (max lo
+                                 count)))))))
+
+
+(count-test :reset)
+(count-test :inc 100)
+(count-test :bound -10 10)
+
+(setf (symbol-function 'dlambda-test)
+      (dlambda
+       (:something-special ()
+                           (format t "SPECIAL~%"))
+       (t (&rest args)
+          (format t "DEFAULT: ~a~%" args))))
+
+(dlambda-test 1 2 3)
+
+
