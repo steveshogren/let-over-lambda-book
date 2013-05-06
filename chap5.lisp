@@ -375,4 +375,40 @@
 
 (dlambda-test 1 2 3)
 
+(defmacro alambda (parms &body body)
+  `(labels ((self ,parms ,@body))
+     #'self))
+
+(alambda (n)
+    (if (> n 0)
+        (cons
+         n
+         (self (- n 1)))))
+
+(defmacro aif (test then &optional else)
+  `(let ((it ,test))
+     (if it ,then ,else)))
+
+(defun |#`-reader| (stream sub-char numarg)
+  (declare (ignore sub-char))
+  (unless numarg (setq numarg 1))
+  `(lambda ,(loop for i from 1 to numarg
+             collect (symb 'a i))
+     ,(funcall
+       (get-macro-character #\`) stream nil)))
+
+(set-dispatch-macro-character
+ #\# #\` #'|#`-reader|)
+
+(mapcar (lambda (a)
+          (list a ''empty))
+        `(var-a var-b var-c))
+
+(mapcar (lambda (a)
+          `(,a 'empty))
+        `(var-a var-b var-c))
+
+(mapcar #`(,a1 'empty)
+        `(var-a var-b var-c))
+
 
