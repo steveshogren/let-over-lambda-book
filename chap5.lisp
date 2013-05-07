@@ -411,4 +411,41 @@
 (mapcar #`(,a1 'empty)
         `(var-a var-b var-c))
 
+(let ((vars '(var-a var-b var-c)))
+  (mapcar #2`(,a1 ',a2)
+          vars
+          (loop for v in vars
+                collect (gensym
+                         (symbol-name v)))))
+
+
+(#3`(((,a1)) ,@a2 (,a3))
+   (gensym)
+   '(a b c)
+   'hello)
+
+(#3`(((,@a2)) ,a3 (,a1 ,a1))
+   (gensym)
+   '(a b c)
+   'hello)
+
+(defmacro alet% (letargs &rest body)
+  `(let ((this) ,@letargs)
+     (setq this ,@(last body))
+     ,@(butlast body)
+     this))
+
+(let ((z (alet% ((sum) (mul) (expt))
+          (funcall this :reset)
+          (dlambda
+           (:reset ()
+                   (psetq sum 0
+                          mul 1
+                          expt 2))
+           (t (n)
+              (psetq sum (+ sum n)
+                     mul (* mul n)
+                     expt (expt expt n))
+              (list sum mul expt))))))
+  (loop for i from 1 to 5 collect (funcall z 2)))
 
