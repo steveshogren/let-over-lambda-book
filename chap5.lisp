@@ -449,3 +449,11 @@
               (list sum mul expt))))))
   (loop for i from 1 to 5 collect (funcall z 2)))
 
+(defmacro alet (letargs &rest body)
+  `(let ((this) ,@letargs)
+     (setq this ,@(last body))
+     ,@(butlast body)
+     (lambda (&rest params)
+       (apply this params))))
+
+
