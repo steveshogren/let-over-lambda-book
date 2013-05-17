@@ -492,3 +492,10 @@
                        (state going-up)
                      (decf acc n)))))
 
+(defmacro! ichain-before (&rest body)
+  `(let ((,g!indir-env this))
+     (setq this
+           (lambda (&rest ,g!temp-args)
+             ,@body
+             (apply ,g!indir-env
+                    ,g!temp-args)))))
