@@ -499,3 +499,33 @@
              ,@body
              (apply ,g!indir-env
                     ,g!temp-args)))))
+
+(alet ((acc 0))
+      (ichain-before
+       (format t "changing from ~a~%" acc))
+      (lambda (n)
+        (incf acc n)))
+
+(setf (symbol-function 'ichain-test) 
+      (alet ((acc 0))
+            (ichain-before
+             (format t "A~%"))
+            (ichain-before
+             (format t "B~%"))
+            (ichain-before
+             (format t "C~%"))
+            (lambda (n)
+              (incf acc n))))
+(ichain-test 2)
+
+(let ((tta (alet ((acc 0))
+         (lambda (n)
+           (ichain-before
+            (format t "hello world~%"))
+           (incf acc n)))))
+      (loop for i from 1 to 4
+            do
+            (format t "~:r invocation: ~%" i)
+            (funcall tta i)))
+
+
