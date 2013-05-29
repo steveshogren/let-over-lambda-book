@@ -528,4 +528,59 @@
             (format t "~:r invocation: ~%" i)
             (funcall tta i)))
 
+(defmacro! ichain-after (&rest body)
+  `(let ((,g!indir-env this))
+     (setq this
+           (lambda (&rest ,g!temp-args)
+             (prog1
+                 (apply ,g!indir-env
+                        ,g!temp-args)
+               ,@body)))))
+(let ((x (alet ((acc 0))
+         (ichain-before
+          (format t "changing from ~a~%" acc))
+         (ichain-after
+          (format t "changed to ~a~%" acc))
+         (lambda (n)
+           (incf acc n)))))
+  (funcall x 7))
 
+(defmacro! ichain-intercept% (&rest body)
+  `(let ((,g!indir-env this))
+     (setq this
+           (lambda (&rest ,g!temp-args)
+             (block intercept
+               (prog1
+                   (apply ,g!indir-env
+                          ,g!temp-args)
+                 ,@body))))))
+(let ((x (alet ((acc 0))
+         (ichain-intercept%
+          (when (< acc 0)
+            (format t "acc went negative ~%")
+            (setq acc 0)
+            (return-from intercept acc)))
+         (lambda (n)
+           (incf acc n)))))
+  (funcall x -9))
+(defmacro! ichain-intercept (&rest body)
+  `(let ((,g!indir-env this))
+     (setq this
+           (lambda (&rest ,g!temp-args)
+             (block ,g!intercept
+               (macrolet ((intercept (v)
+                                     `(return-from
+                                          ,',g!intercept
+                                        ,v)))
+                 (prog1
+                     (apply ,g!indir-env
+                            ,g!temp-args)
+                   ,@body)))))))
+(let ((x (alet ((acc 0))
+               (ichain-intercept
+                (when (< acc 0)
+                  (format t "acc went neg~%")
+                  (setq acc 0)
+                  (intercept acc)))
+               (lambda (n)
+                 (incf acc n))))))
