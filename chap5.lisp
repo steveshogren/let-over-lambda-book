@@ -583,4 +583,26 @@
                   (setq acc 0)
                   (intercept acc)))
                (lambda (n)
-                 (incf acc n))))))
+                 (incf acc n)))))
+  (funcall x -8))
+
+(defmacro alet-hotpatch% (letargs &rest body)
+  `(let ((this) ,@letargs)
+     (setq this ,@(last body))
+     ,@(butlast body)
+     (lambda (&rest args)
+       (if (eq (car args) ':hotpatch)
+           (setq this (cadr args))
+         (apply this args)))))
+
+(setf (symbol-function 'hotpatch-test)
+         (alet-hotpatch% ((acc 0))
+                         (lambda (n)
+                           (incf acc n))))
+(hotpatch-test 3)
+
+(hotpatch-test
+ :hotpatch
+ (let ((acc 0))
+   (lambda (n)
+     (incf acc (* 2 n)))))
