@@ -1,4 +1,5 @@
 (load "chap3.lisp")
+(load "chap1.lisp")
 
 (defmacro! defunits% (quantity base-unit &rest units)
   `(defmacro ,(symb 'unit-of- quantity) (,g!val ,g!un)
@@ -616,3 +617,57 @@
                  (setq ,g!this closure))
       (t (&rest args)
          (apply ,g!this args)))))
+
+(defun let-binding-transform (bs)
+  (if bs
+      (cons
+       (cond  ((symbolp (car bs))
+               (list (car bs)))
+              ((consp (car bs))
+               (car bs))
+              (t
+               (error "Bad let bindings")))
+       (let-binding-transform (cdr bs)))))
+(let-binding-transform
+ '(a (b) (c nil)))
+
+(defmacro sublet (bindings% &rest body)
+  (let ((bindings (let-binding-transform
+                   bindings%)))
+    (setq bindings
+          (mapcar
+           (lambda (x)
+             (cons (gensym (symbol-name (car x))) x))
+           bindings))
+    `(let (,@(mapcar #'list
+                     (mapcar #'car bindings)
+                     (mapcar #'caddr bindings)))
+       ,@(tree-leaves
+          body
+          #1= (member x bindings :key #'cadr)
+          (caar #1#)))))
+(macroexpand
+ '(sublet ((a 0))
+          (list a)))
+(macroexpand
+ '(sublet ((a 0))
+          (list 'a)))
+
+(defmacro sublet* (bindings &rest body)
+  `(sublet ,bindings
+           ,@(mapcar #'macroexpand-1 body)))
+
+(macroexpand '(sublet* ((a 0))
+                       (list a)))
+(defmacro injector-for-a ()
+  'a)
+
+(macroexpand '(sublet* ((a 0))
+                       (list a)))
+(defmacro injector-for-a ()
+  'a)
+
+(macroexpand-1
+ '(sublet* ((a 0))
+           (injector-for-a)))
+
