@@ -671,3 +671,19 @@
  '(sublet* ((a 0))
            (injector-for-a)))
 
+(defmacro pandoriclet (letargs &rest body)
+  (let ((letargs (cons
+                  '(this)
+                  (let-binding-transform
+                   letargs))))
+    `(let (,@letargs)
+       (setq this ,@(last body))
+       ,@(butlast body)
+       (dlambda
+        (:pandoric-get (sym)
+                       ,(pandoriclet-get letargs))
+        (:pandoric-set (sym val)
+                       ,(pandoriclet-set letargs))
+        (t (&rest args)
+           (apply this args))))))
+
