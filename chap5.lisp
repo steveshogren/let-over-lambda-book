@@ -628,6 +628,7 @@
               (t
                (error "Bad let bindings")))
        (let-binding-transform (cdr bs)))))
+
 (let-binding-transform
  '(a (b) (c nil)))
 
@@ -686,4 +687,21 @@
                        ,(pandoriclet-set letargs))
         (t (&rest args)
            (apply this args))))))
+
+(defun pandoriclet-get (letargs)
+  `(case sym
+     ,@(mapcar #`((,(car a1)) ,(car a1))
+               letargs)
+     (t (error
+         "unknown pandoric get: ~a"
+         sym))))
+(defun pandoriclet-set (letargs)
+  `(case sym
+     ,@(mapcar #`((,(car a1) val))
+               letargs)
+     (t (error
+         "unknown pandoric set: ~a"
+         sym val))))
+
+
 
