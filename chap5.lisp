@@ -672,6 +672,7 @@
  '(sublet* ((a 0))
            (injector-for-a)))
 
+;; Allows the opening of a closure for get/set outside itself
 (defmacro pandoriclet (letargs &rest body)
   (let ((letargs (cons
                   '(this)
@@ -714,11 +715,17 @@
 (pantest :pandoric-set 'acc 100)
 (pantest 3)
 (pantest :pandoric-get 'this)
+
 (declaim (inline get-pandoric))
 (defun get-pandoric (box sym)
+  "Call a pandoric closure like (get-pandoric #'pan 'val)"
   (funcall box :pandoric-get sym))
 (defsetf get-pandoric (box sym) (val)
+  "Set a pandoric closure value (setf (get-pandoric #'pan 'val) 4"
   `(progn
      (funcall ,box :pandoric-set ,sym ,val)
      ,val))
+
+(get-pandoric #'pantest 'acc)
+(setf (get-pandoric #'pantest 'acc) -10)
 
