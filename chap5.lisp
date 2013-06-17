@@ -697,11 +697,28 @@
          sym))))
 (defun pandoriclet-set (letargs)
   `(case sym
-     ,@(mapcar #`((,(car a1) val))
+     ,@(mapcar #`((,(car a1))
+                  (setq ,(car a1) val))
                letargs)
      (t (error
          "unknown pandoric set: ~a"
          sym val))))
 
+(setf (symbol-function 'pantest)
+      (pandoriclet ((acc 0))
+                   (lambda (n) (incf acc n))))
 
+(pantest 3)
+(pantest 5)
+(pantest :pandoric-get 'acc)
+(pantest :pandoric-set 'acc 100)
+(pantest 3)
+(pantest :pandoric-get 'this)
+(declaim (inline get-pandoric))
+(defun get-pandoric (box sym)
+  (funcall box :pandoric-get sym))
+(defsetf get-pandoric (box sym) (val)
+  `(progn
+     (funcall ,box :pandoric-set ,sym ,val)
+     ,val))
 
