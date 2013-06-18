@@ -729,3 +729,39 @@
 (get-pandoric #'pantest 'acc)
 (setf (get-pandoric #'pantest 'acc) -10)
 
+(defmacro! with-pandoric (syms o!box &rest body)
+  "Opens the 'box' of o!box to gain access to the value of 'syms'"
+  `(symbol-macrolet
+       (,@(mapcar #`(,a1 (get-pandoric ,g!box ',a1))
+                  syms))
+     ,@body))
+;; pull out the 'acc' value
+(with-pandoric (acc) #'pantest
+               (format t "value of acc: ~a~%" acc))
+;; set the 'acc' value
+(with-pandoric (acc) #'pantest
+               (setq acc 5))
+(pantest 1)
+
+(defun pandoric-hotpatch (box new)
+  "Rebind the 'this' value to a new closure with a new inner closed value, but without replacing any outer bound values"
+  (with-pandoric (this) box
+                 (setq this new)))
+
+(pantest 0)
+(pandoric-hotpatch #'pantest
+                   (let ((acc 100))
+                     (lambda (n) (decf acc n))))
+(pantest 3)
+(with-pandoric (acc) #'pantest
+               acc)
+
+(defmacro pandoric-recode (vars box new)
+  "Rebinds 'this' without changing any values, either inner or outer"
+  `(with-pandoric (this ,@vars) ,box
+                  (setq this ,new)))
+
+(pandoric-recode (acc) #'pantest
+                 (lambda (n)
+                   (decf acc (/ n 2))))
+(pantest 2)
