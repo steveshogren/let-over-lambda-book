@@ -765,3 +765,74 @@
                  (lambda (n)
                    (decf acc (/ n 2))))
 (pantest 2)
+
+(defmacro plambda (largs pargs &rest body)
+  (let ((pargs (mapcar #'list pargs)))
+    `(let (this self)
+       (setq
+        this (lambda ,largs ,@body)
+        self (dlambda
+              (:pandoric-get (sym)
+                             ,(pandoriclet-get pargs))
+              (:pandoric-set (sym)
+                             ,(pandoriclet-set pargs))
+              (t (&rest args)
+                 (apply this args)))))))
+
+
+(setf (symbol-function 'pantest)
+      (let ((a 0))
+        (let ((b 1))
+          (plambda (n) (a b)
+              (incf a n)
+              (setq b (* b n))))))
+(defun pantest-peek ()
+  (with-pandoric (a b) #'pantest
+                 (format t "a=~a, b=~a~%" a b)))
+(pantest-peek)
+
+
+(defmacro defpan (name args &rest body)
+  "To make functions with lexical access to an anaphor 'self'"
+  `(defun ,name (self)
+     ,(if args
+          `(with-pandoric ,args self
+                          ,@body)
+        `(progn ,@body))))
+
+(defun make-stats-counter
+  "Keeps track of 3 values at once"
+  (&key (count 0)
+        (sum 0)
+        (sum-of-squares 0))
+  (plambda (n) (sum count sum-of-squares)
+      (incf sum-of-squares (expt n 2))
+      (incf sum n)
+      (incf count)))
+
+(defpan stats-counter-mean (sum count)
+  (/ sum count))
+(defpan stats-counter-variance (sum-of-squares sum count)
+  (if (< count 2)
+      0
+    (/ (- sum-of-squares
+          (* sum
+             (stats-counter-mean self)))
+       (- count 1))))
+(defpan stats-counter-stddev ()
+  (sqrt (stats-counter-variance self)))
+
+(defun make-noisy-stats-counter
+  (&key (count 0)
+      (sum 0)
+      (sum-of-squares 0))
+  (plambda (n) (sum count sum-of-squares)
+      (incf sum-of-squares (expt n 2))
+      (incf sum n)
+      (incf count)
+      (format t
+              "~MEAN=~a~%VAR=~a~%STDDEV=~a~%"
+              (stats-counter-mean self)
+              (stats-counter-variance self)
+              (stats-counter-stddev self))))
+
