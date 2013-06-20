@@ -836,3 +836,10 @@
               (stats-counter-variance self)
               (stats-counter-stddev self))))
 
+(defvar pandoric-eval-tunnel)
+(defmacro pandoric-eval (vars expr)
+  `(let ((pandoric-eval-tunnel
+          (plambda () ,var t)))
+     (eval `(with-pandoric
+             ,',vars pandoric-eval-tunnel
+             ,,expr))))
