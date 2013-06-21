@@ -835,11 +835,19 @@
               (stats-counter-mean self)
               (stats-counter-variance self)
               (stats-counter-stddev self))))
+(setf (symbol-function 'statest)
+      (make-stats-counter))
+(statest 4)
+
 
 (defvar pandoric-eval-tunnel)
 (defmacro pandoric-eval (vars expr)
   `(let ((pandoric-eval-tunnel
-          (plambda () ,var t)))
+          (plambda () ,vars t)))
      (eval `(with-pandoric
              ,',vars pandoric-eval-tunnel
              ,,expr))))
+(let ((x 1))
+  (pandoric-eval (x)
+                 '(+ 1 x)))
+(macroexpand-1 (pandoric-eval (x) '(+ 1 x)))
