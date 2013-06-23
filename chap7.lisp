@@ -17,3 +17,7 @@
 (defmacro safe-progn (&rest body)
   `(locally #0f ,@body))
 (macroexpand '(fast-progn (+ 1 2)))
+(macroexpand '(fast-progn
+               (declare (type fixnum a))
+               (the fixnum (+ a 1))))
+
