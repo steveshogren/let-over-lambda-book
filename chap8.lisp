@@ -85,5 +85,15 @@
 (go-forth my-forth
           3 dup * print)
 
+(defmacro new-forth ()
+  `(alet ,forth-registers
+         (forth-install-prims)
+         (dolist (v forth-stdlib)
+                    (funcall this v))
+         (lambda (v)
+           (let ((word (forth-lookup v dict)))
+             (if word
+                 (forth-handle-found)
+                  (forth-handle-not-found))))))
 
 
