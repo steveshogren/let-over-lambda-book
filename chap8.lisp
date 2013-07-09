@@ -1,3 +1,6 @@
+(load "chap3.lisp")
+(load "chap1.lisp")
+
 (defvar forth-registers
   '(pstack rstack pc
            dict compiling dtable))
@@ -81,19 +84,20 @@
          (nconc forth-stdlib
                 ',all)))
 
-(defvar my-forth (new-forth))
-(go-forth my-forth
-          3 dup * print)
 
 (defmacro new-forth ()
   `(alet ,forth-registers
          (forth-install-prims)
          (dolist (v forth-stdlib)
                     (funcall this v))
-         (lambda (v)
-           (let ((word (forth-lookup v dict)))
-             (if word
-                 (forth-handle-found)
-                  (forth-handle-not-found))))))
+         (plambda (v) ,forth-registers
+             (let ((word (forth-lookup v dict)))
+               (if word
+                   (forth-handle-found)
+                 (forth-handle-not-found))))))
+
+(defvar my-forth (new-forth))
+(go-forth my-forth
+          3 dup * print)
 
 
