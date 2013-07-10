@@ -87,6 +87,7 @@
 
 (defmacro new-forth ()
   `(alet ,forth-registers
+         (setq dtable (make-hash-table))
          (forth-install-prims)
          (dolist (v forth-stdlib)
                     (funcall this v))
@@ -98,6 +99,22 @@
 
 (defvar my-forth (new-forth))
 (go-forth my-forth
-          3 dup * print)
+          1 2.0 "three" 'four '(f i v e))
+
+(defmacro forth-install-prims ()
+  `(progn
+     ,@(mapcar
+        #`(let ((thread (lambda ()
+                          ,@(cddr a1))))
+            (setf dict
+                  (make-forth-word
+                   :name ',(car a1)
+                   :prev dict
+                   :immediate ,(cadr a1)
+                   :thread thread))
+            (setf (gethash thread dtable)
+                  ',(cddr a1)))
+        forth-prim-forms)))
+
 
 
