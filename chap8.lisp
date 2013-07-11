@@ -116,5 +116,23 @@
                   ',(cddr a1)))
         forth-prim-forms)))
 
+(def-forth-prim [ t ; <- t means immediate
+  (setf compiling nil))
+
+(def-forth-prim ] nil ; <- not immediate
+  (setf compiling t))
+
+(defmacro forth-compile-in (v)
+  `(setf (forth-word-thread dict)
+         (nconc (forth-word-thread dict)
+                (list ,v))))
+
+(defmacro forth-handle-found ()
+  `(if (and compiling
+            (not (forth-word-immediate word)))
+       (forth-compile-in (forth-word-thread word))
+     (progn
+       (setf pc (list (forth-word-thread word)))
+       (forth-inner-interpreter))))
 
 
