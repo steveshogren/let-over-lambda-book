@@ -1,6 +1,17 @@
 (load "chap3.lisp")
 (load "chap1.lisp")
 
+(defun |#`-reader| (stream sub-char numarg)
+  (declare (ignore sub-char))
+  (unless numarg (setq numarg 1))
+  `(lambda ,(loop for i from 1 to numarg
+             collect (symb 'a i))
+     ,(funcall
+       (get-macro-character #\`) stream nil)))
+
+(set-dispatch-macro-character
+ #\# #\` #'|#`-reader|)
+
 (defvar forth-registers
   '(pstack rstack pc
            dict compiling dtable))
@@ -153,4 +164,11 @@
          (forth-compile-in v)
        (push v pstack)))))
 
+(def-forth-prim create nil
+  (setf dict (make-forth-word :prev dict)))
 
+(def-forth-prim name nil
+  (setf (forth-word-name dict) (pop pstack)))
+
+(def-forth-prim immediate nil
+  (setf (forth-word-immediate dict) t))
