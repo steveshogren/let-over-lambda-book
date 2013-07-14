@@ -172,3 +172,26 @@
 
 (def-forth-prim immediate nil
   (setf (forth-word-immediate dict) t))
+
+(go-forth my-forth
+          ] dup * [)
+
+(forth-stdlib-add
+ create
+ ] create ] [
+ '{ name)
+
+(forth-stdlib-add
+ { (postpone [) [
+ '} name immediate)
+
+(setq my-forth (new-forth))
+
+(go-forth my-forth
+          { dup * } 'square name)
+
+(go-forth my-forth
+          5 square print)
+
+(go-forth my-forth
+          { square square } 'quartic name)
