@@ -195,3 +195,20 @@
 
 (go-forth my-forth
           { square square } 'quartic name)
+
+(go-forth my-forth
+          1/2 quartic print)
+(go-forth my-forth
+          { 3 } 'three nae
+          three three * print)
+(go-forth my-forth
+          { 4.0 } '4 name
+          4 4 * print)
+
+(def-forth-prim @ nil
+  (push (car (pop pstack))
+        pstack))
+(def-forth-prim ! nil
+  (let ((location (pop pstack)))
+    (setf (car location) (pop pstack))))
+
