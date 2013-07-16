@@ -212,3 +212,27 @@
   (let ((location (pop pstack)))
     (setf (car location) (pop pstack))))
 
+(defmacro forth-unary-word-definer (&rest words)
+  `(progn
+     ,@(mapcar
+        #`(def-forth-prim ,a1 nil
+            (push (,a1 (pop pstack))
+                  pstack))
+        words)))
+
+(defmacro! forth-binary-word-definer (&rest words)
+  `(progn
+     ,@(mapcar
+        #`(def-forth-prim ,a1 nil
+            (let ((,g!top (pop pstack)))
+              (push (,a1 (pop pstack)
+                         ,g!top)
+                    pstack)))
+        words)))
+
+(forth-unary-word-definer
+ not car cdr cadr caddr cadddr
+ oddp evenp)
+(forth-binary-word-definer
+ eq equal + - / = < > <= >=
+ max min and or)
